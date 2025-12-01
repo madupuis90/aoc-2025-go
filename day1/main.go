@@ -2,17 +2,15 @@ package main
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"example.com/aoc-2025-go/util"
 )
 
 /*
-Part 1: 3714264 in 207.8µs
-Part 2: 18805872 in 773.2µs
+Part 1: 992 in 124.991µs
+Part 2: 5635 in 116.93µs
 */
 func main() {
 	start := time.Now()
@@ -26,62 +24,78 @@ func main() {
 
 func part1(f string) int {
 	total := 0
+	dial := 50
 	scanner := util.CreateScannerFromFile(f)
-	loc1 := []int{}
-	loc2 := []int{}
 
 	for scanner.Scan() {
-		var x, y int
+
 		line := scanner.Text()
-		fmt.Sscanf(line, "%d %d", &x, &y)
-		loc1 = append(loc1, x)
-		loc2 = append(loc2, y)
-	}
+		direction := line[0:1]
+		num, _ := strconv.Atoi(line[1:])
 
-	slices.Sort(loc1)
-	slices.Sort(loc2)
-
-	for i := 0; i < len(loc1); i++ {
-		diff := loc1[i] - loc2[i]
-		if diff < 0 { // math.Abs only works with floats in Go?
-			diff = -diff
+		if direction == "L" {
+			dial = dial - num
+			dial = pmod(dial, 100)
 		}
-		total = total + diff
+		if direction == "R" {
+			dial = dial + num
+			dial = pmod(dial, 100)
+		}
+
+		if dial == 0 {
+			total += 1
+		}
 	}
 	return total
 }
 
 func part2(f string) int {
 	total := 0
+	dial := 50
 	scanner := util.CreateScannerFromFile(f)
-	cache := map[int]int{}
-	loc1 := []int{}
-	loc2 := []int{}
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		fields := strings.Fields(line)
-		num1, _ := strconv.Atoi(fields[0])
-		num2, _ := strconv.Atoi(fields[1])
-		loc1 = append(loc1, num1)
-		loc2 = append(loc2, num2)
-	}
 
-	count := 0
-	for i := 0; i < len(loc1); i++ {
-		value, exist := cache[loc1[i]]
-		if exist {
-			total = total + loc1[i]*value
-			continue
-		}
-		for j := 0; j < len(loc2); j++ {
-			if loc2[j] == loc1[i] {
-				count++
+		line := scanner.Text()
+		direction := line[0:1]
+		num, _ := strconv.Atoi(line[1:])
+
+		total += num / 100 // count full turns right away
+		num = pmod(num, 100)
+
+		if direction == "L" {
+			diff := dial - num
+			if dial != 0 && diff < 0 { // count if we pass 0, don't double count landing on zeroes
+				total += 1
 			}
+			dial = pmod(diff, 100)
+
 		}
-		cache[loc1[i]] = count
-		total = total + loc1[i]*count
-		count = 0
+		if direction == "R" {
+			diff := dial + num
+			if dial != 0 && diff > 100 { // count if we pass 0, don't double count landing on zeroes
+				total += 1
+			}
+			dial = pmod(diff, 100)
+
+		}
+
+		if dial == 0 {
+			total += 1
+		}
+
 	}
 	return total
+}
+
+// Positive modulo, returns non negative solution to x % d
+func pmod(x, d int) int {
+	x = x % d
+	if x >= 0 {
+		return x
+	}
+	if d < 0 {
+		return x - d
+	}
+	return x + d
 }
