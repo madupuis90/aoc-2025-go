@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"example.com/aoc-2025-go/util"
 )
 
 /*
-Part 1: 538191549061 in 17.9063ms
-Part 2: 34612812972206 in 1.6353173s
+Part 1: 16842 in 47.58µs
+Part 2: 167523425665348 in 191.65µs
 */
 func main() {
 	start := time.Now()
@@ -50,20 +51,32 @@ func part2(f string) int {
 	scanner := util.CreateScannerFromFile(f)
 	total := 0
 
-	batteries := [12]int{}
 	for scanner.Scan() {
 		bank := scanner.Text()
+		batteries := [12]int{}
+		lenBat := len(batteries)
+		lenBank := len(bank)
 
 		for idx, r := range bank {
 			n := runeToInt(r)
-			for i, bat := range batteries {
-				if n > bat && idx != len(bank)-(i+1) {
-					bat = n
-					for j := i; j <= 12; j++ {
+			var start int
+			if start = lenBat - (lenBank - idx); start < 0 {
+				start = 0
+			}
+			for i := start; i < lenBat; i++ {
+				if n > batteries[i] {
+					batteries[i] = n
+					for j := i + 1; j < lenBat; j++ {
 						batteries[j] = 0
 					}
+					break
 				}
 			}
+
+		}
+		for i, c := range batteries {
+			mul := lenBat - i - 1
+			total += c * int(math.Pow10(mul))
 		}
 	}
 	return total
