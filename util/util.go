@@ -40,12 +40,11 @@ func RuneSliceAtoi(s []rune) []int {
 	return result
 }
 
-func PrintGrid[T any](grid [][]T) {
+func PrintGrid(grid [][]rune) {
 	for _, r := range grid {
-		fmt.Println(r)
-		// for _, c := range r {
-		// 	fmt.Printf("%v ", c)
-		// }
-		// fmt.Printf("\n")
+		for _, c := range r {
+			fmt.Printf("%c ", c)
+		}
+		fmt.Println()
 	}
 }
